@@ -12,7 +12,7 @@ router: APIRouter = APIRouter()
 QUESTION: str = "Extract text from the image in structured format."
 
 
-@router.post("/transcribe-image")
+@router.post("/image/transcribe-image")
 async def transcribe_image(
     request: Request,
     data: GetImageRequest,
@@ -53,14 +53,13 @@ async def transcribe_image(
             status_code=500,
         )
 
-        # if file_data["code"] == 200:
-    file_name: str = file_data["message"]
+    # if file_data["code"] == 200:
 
     return JSONResponse(
         content={
             "status": "ok",
             "text": response,
-            "file_name": file_name,
+            "file_name": file_data["message"],
         },
         status_code=200,
     )

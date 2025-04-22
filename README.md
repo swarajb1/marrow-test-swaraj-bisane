@@ -41,8 +41,6 @@ marrow_test/
 This project uses Poetry for dependency management. To install:
 
 ```bash
-# Clone the repository
-git clone <repository-url>
 cd marrow_test
 
 # Install dependencies
@@ -74,7 +72,7 @@ The API server will start on `http://0.0.0.0:8002`.
 
 ### Extract Text from Image
 
-**Endpoint**: `POST /work`
+**Endpoint**: `POST /image/transcribe-image`
 
 **Request Body**:
 
