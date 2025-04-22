@@ -1,40 +1,58 @@
-import base64
+import os
+from typing import Literal, NoReturn, overload
 
+import openai
 from openai import OpenAI
+
+openai.api_key = os.getenv("OPENAI_API_KEY")
 
 client = OpenAI()
 
-# Analyze the content of an image
+MODEL = os.environ.get("OPENAI_MODEL", "gpt-4.1-mini")
 
 
-# Function to encode the image
-def encode_image(image_path):
-    with open(image_path, "rb") as image_file:
-        return base64.b64encode(image_file.read()).decode("utf-8")
+@overload
+def generate_response_with_image_base_encoded(
+    question: str,
+    image_file_base_encoded: str,
+    raise_error: Literal[True] = True,
+) -> str:
+    ...
 
 
-# Path to your image
-image_path = "path_to_your_image.jpg"
-
-# Getting the Base64 string
-base64_image = encode_image(image_path)
-
-completion = client.chat.completions.create(
-    model="gpt-4.1",
-    messages=[
-        {
-            "role": "user",
-            "content": [
-                {"type": "text", "text": "what's in this image?"},
+def generate_response_with_image_base_encoded(
+    question: str,
+    image_file_base_encoded: str,
+    raise_error=False,
+) -> str | None | NoReturn:
+    try:
+        response = client.chat.completions.create(
+            model=MODEL,
+            messages=[
                 {
-                    "type": "image_url",
-                    "image_url": {
-                        "url": f"data:image/jpeg;base64,{base64_image}",
-                    },
+                    "role": "user",
+                    "content": [
+                        {
+                            "type": "text",
+                            "text": question,
+                        },
+                        {
+                            "type": "image_url",
+                            "image_url": {
+                                "url": image_file_base_encoded,
+                            },
+                        },
+                    ],
                 },
             ],
-        },
-    ],
-)
+        )
 
-print(completion.choices[0].message.content)
+        return response.choices[0].message.content
+
+    except Exception as e:
+        if raise_error:
+            raise RuntimeError(f"OpenAI {MODEL} API error: " + str(e))
+        else:
+            print(f"OpenAI {MODEL} API error: " + str(e))
+
+    return None

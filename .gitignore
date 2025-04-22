@@ -94,3 +94,7 @@ Thumbs.db
 
 # Optional: Ignore bundled dependencies (if you deploy this way)
 # bundle/
+
+
+
+created_files/

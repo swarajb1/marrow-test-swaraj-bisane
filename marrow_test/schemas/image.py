@@ -1,22 +1,42 @@
-from typing import Annotated
+import base64
 
-from fastapi import File, UploadFile
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, field_validator, model_validator
 
 
 class GetImageRequest(BaseModel):
-    image_file: Annotated[UploadFile, File()] | None = None
+    image_file_base_encoded: str | None = None
 
     image_url: str | None = None
 
-    @field_validator("image_file", mode="before")
-    def check_image_file(cls, v):
-        if not v.filename.endswith((".jpg", ".jpeg", ".png")):
-            raise ValueError("Invalid image file type")
+    @field_validator("image_file_base_encoded", mode="before")
+    def check_image_file_base_encoded(cls, v):
+        if not v:
+            return None
+
+        data = v.split(",")[1]
+
+        if len(data) % 4 != 0:
+            raise ValueError("Invalid base64 image data:")
+
+        try:
+            base64.b64decode(data, validate=True)
+
+        except Exception:
+            raise ValueError("Invalid base64 image data:")
+
         return v
 
     @field_validator("image_url", mode="before")
     def check_image_url(cls, v):
+        if not v:
+            return None
+
         if not v.startswith(("http://", "https://")):
             raise ValueError("Invalid image URL")
         return v
+
+    @model_validator(mode="after")
+    def check_image(self) -> "GetImageRequest":
+        if not self.image_file_base_encoded and not self.image_url:
+            raise ValueError("Either image_file_base_encoded or image_url must be provided")
+        return self
