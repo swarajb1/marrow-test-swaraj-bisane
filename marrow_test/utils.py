@@ -4,7 +4,7 @@ from uuid import uuid4
 import fitz  # PyMuPDF
 
 
-def save_text_to_pdf(text: str, filename: str | None = None) -> str:
+def save_text_to_pdf(text: str, filename: str | None = None) -> dict:
     try:
         filename = str(uuid4()) + ".pdf" if filename is None else filename
 
@@ -14,7 +14,13 @@ def save_text_to_pdf(text: str, filename: str | None = None) -> str:
         doc.save(os.path.join("created_files", filename))
         doc.close()
 
-        return filename
+        return {
+            "code": 200,
+            "message": filename,
+        }
 
     except Exception as e:
-        raise OSError("Failed to save PDF: " + str(e))
+        return {
+            "code": 500,
+            "error": str(e),
+        }

@@ -47,4 +47,7 @@ def generate_response_with_image_url(question: str, image_url: str, raise_error=
         return {"response": response.choices[0].message.content}
 
     except Exception as e:
-        return {"error": f"OpenAI {MODEL} API error: " + str(e)}
+        return {
+            "error": f"OpenAI {MODEL} model API error: " + str(e.message),
+            "code": e.status_code if hasattr(e, "status_code") else 500,
+        }

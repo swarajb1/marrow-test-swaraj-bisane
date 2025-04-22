@@ -47,4 +47,7 @@ def generate_response_with_image_base_encoded(
         return {"response": response.choices[0].message.content}
 
     except Exception as e:
-        return {"error": f"OpenAI {MODEL} API error: " + str(e)}
+        return {
+            "error": f"OpenAI {MODEL} API error: " + str(e),
+            "code": e.status_code if hasattr(e, "status_code") else 500,
+        }
