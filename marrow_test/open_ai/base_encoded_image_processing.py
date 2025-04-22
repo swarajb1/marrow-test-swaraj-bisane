@@ -1,5 +1,4 @@
 import os
-from typing import Literal, NoReturn, overload
 
 import openai
 from openai import OpenAI
@@ -11,20 +10,18 @@ client = OpenAI()
 MODEL = os.environ.get("OPENAI_MODEL", "gpt-4.1-mini")
 
 
-@overload
-def generate_response_with_image_base_encoded(
-    question: str,
-    image_file_base_encoded: str,
-    raise_error: Literal[True] = True,
-) -> str:
-    ...
+# @overload
+# def generate_response_with_image_base_encoded(
+#     question: str,
+#     image_file_base_encoded: str,
+#     raise_error: Literal[True] = True,
+# ) -> str: ...
 
 
 def generate_response_with_image_base_encoded(
     question: str,
     image_file_base_encoded: str,
-    raise_error=False,
-) -> str | None | NoReturn:
+):
     try:
         response = client.chat.completions.create(
             model=MODEL,
@@ -47,12 +44,7 @@ def generate_response_with_image_base_encoded(
             ],
         )
 
-        return response.choices[0].message.content
+        return {"response": response.choices[0].message.content}
 
     except Exception as e:
-        if raise_error:
-            raise RuntimeError(f"OpenAI {MODEL} API error: " + str(e))
-        else:
-            print(f"OpenAI {MODEL} API error: " + str(e))
-
-    return None
+        return {"error": f"OpenAI {MODEL} API error: " + str(e)}

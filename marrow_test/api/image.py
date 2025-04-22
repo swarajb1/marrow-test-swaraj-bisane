@@ -18,30 +18,37 @@ async def work_(
     data: GetImageRequest,
     image_file: Annotated[UploadFile, File()] | None = None,
 ):
-    response: str
+    response: dict = {}
 
     if data.image_url:
-        response: str = openai_url_image_processing.generate_response_with_image_url(
+        response = openai_url_image_processing.generate_response_with_image_url(
             question=QUESTION,
             image_url=data.image_url,
-            raise_error=True,
         )
 
     elif data.image_file_base_encoded:
-        response: str = openai_base_encoded_image_processing.generate_response_with_image_base_encoded(
+        response = openai_base_encoded_image_processing.generate_response_with_image_base_encoded(
             question=QUESTION,
             image_file_base_encoded=data.image_file_base_encoded,
-            raise_error=True,
         )
 
-    file_name = save_text_to_pdf(text=response)
+    if "response" in response:
+        file_name = save_text_to_pdf(text=response["response"])
 
-    return JSONResponse(
-        content={
-            "status": "ok",
-            "message": "work",
-            "text": response,
-            "file_name": file_name,
-        },
-        status_code=200,
-    )
+        return JSONResponse(
+            content={
+                "status": "ok",
+                "text": response,
+                "file_name": file_name,
+            },
+            status_code=200,
+        )
+
+    if "error" in response:
+        return JSONResponse(
+            content={
+                "status": "error",
+                "error": response["error"],
+            },
+            status_code=500,
+        )

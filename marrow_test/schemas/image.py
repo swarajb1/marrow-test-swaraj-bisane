@@ -40,3 +40,9 @@ class GetImageRequest(BaseModel):
         if not self.image_file_base_encoded and not self.image_url:
             raise ValueError("Either image_file_base_encoded or image_url must be provided")
         return self
+
+    @model_validator(mode="after")
+    def check_image_data(self) -> "GetImageRequest":
+        if self.image_file_base_encoded and self.image_url:
+            raise ValueError("Both image_file_base_encoded and image_url must be provided")
+        return self
